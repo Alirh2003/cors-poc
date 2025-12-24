@@ -7,7 +7,7 @@
 <body>
 <h1>CORS PoC</h1>
 
-<p>تلفن، پسورد و کد پیامک را اینجا وارد کن و روی دکمه بزن.</p>
+<p>تلفن، پسورد و کد پیامک را اینجا وارد کن.</p>
 
 <label>Cell number:
   <input id="cell" value="09233950961">
@@ -21,36 +21,52 @@
   <input id="code" value="">
 </label><br><br>
 
-<button id="btn">Send verify request</button>
+<button id="btn-send">Send OTP (login)</button>
+<button id="btn-verify">Verify OTP (login/verify)</button>
 
 <pre id="out"></pre>
 
 <script>
-document.getElementById('btn').onclick = function () {
-  const data = {
+function log(msg) {
+  document.getElementById('out').textContent = msg;
+}
+
+function makeBody() {
+  return {
     cellNumber: document.getElementById('cell').value,
     password: document.getElementById('pass').value,
     activationCode: document.getElementById('code').value
   };
+}
 
-  document.getElementById('out').textContent = 'Sending...';
+// مرحله ۱: ارسال OTP
+document.getElementById('btn-send').onclick = function () {
+  const data = makeBody();
+  log('Sending /login ...');
 
   fetch("https://app.karafariniomid.com/security/token/neo/login", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    // اگر نیاز به کوکی سشن باشد، این را فعال کن:
-    // credentials: "include",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   })
   .then(r => r.text())
-  .then(t => {
-    document.getElementById('out').textContent = t;
+  .then(t => log("Response /login:\n" + t))
+  .catch(e => log("Error /login: " + e));
+};
+
+// مرحله ۲: تأیید OTP و دریافت توکن
+document.getElementById('btn-verify').onclick = function () {
+  const data = makeBody();
+  log('Sending /login/verify ...');
+
+  fetch("https://app.karafariniomid.com/security/token/neo/login/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
   })
-  .catch(e => {
-    document.getElementById('out').textContent = "Error: " + e;
-  });
+  .then(r => r.text())
+  .then(t => log("Response /login/verify:\n" + t))
+  .catch(e => log("Error /login/verify: " + e));
 };
 </script>
 </body>
